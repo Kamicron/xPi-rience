@@ -1,5 +1,6 @@
 <template>
   <div class="home-container">
+    <profile />
     <div v-if="user">
       <UserProfile :user="user" />
       <button class="logout-button" @click="logout">Se déconnecter</button>
@@ -9,6 +10,7 @@
       <NuxtLink to="/login" class="login-link">Se connecter</NuxtLink>
     </div>
   </div>
+
 </template>
 
 <script setup lang="ts">

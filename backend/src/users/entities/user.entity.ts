@@ -23,6 +23,9 @@ export class User {
   @Column({ nullable: true })
   accessToken: string;
 
+  @Column({ default: false })
+  isAdmin: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

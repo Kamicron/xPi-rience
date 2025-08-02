@@ -18,6 +18,10 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { googleId } });
   }
 
+  async findById(id: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { id } });
+  }
+
   async updateUser(userId: string, userData: {
     firstName: string;
     lastName: string;

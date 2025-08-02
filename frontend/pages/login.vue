@@ -22,11 +22,13 @@
 const route = useRoute()
 const errorMessage = ref('')
 
-// Vérifier les paramètres d'erreur dans l'URL
-onMounted(() => {
+// Vérifier les paramètres d'erreur et de succès dans l'URL
+onMounted(async () => {
   const error = route.query.error
   const message = route.query.message
+  const user = route.query.user
   
+  // Gestion des erreurs
   if (error === 'user_not_registered') {
     errorMessage.value = message ? decodeURIComponent(message as string) : 'Utilisateur non enregistré'
   } else if (error === 'auth_failed') {
@@ -35,8 +37,31 @@ onMounted(() => {
     errorMessage.value = 'Erreur d\'authentification'
   }
   
+  // Gestion du succès de connexion
+  if (user && !error) {
+    try {
+      const userData = JSON.parse(decodeURIComponent(user as string))
+      
+      // Stocker les données utilisateur dans le localStorage
+      localStorage.setItem('user', JSON.stringify(userData))
+      
+      // Si un token JWT est présent, le stocker séparément pour faciliter l'accès
+      if (userData.jwtToken) {
+        localStorage.setItem('jwtToken', userData.jwtToken)
+        console.log('✅ Token JWT stocké avec succès!')
+      }
+      
+      // Rediriger vers la page d'accueil ou dashboard
+      await navigateTo('/')
+      
+    } catch (error) {
+      console.error('Erreur lors du parsing des données utilisateur:', error)
+      errorMessage.value = 'Erreur lors de la récupération des données utilisateur'
+    }
+  }
+  
   // Nettoyer l'URL après avoir lu les paramètres
-  if (error) {
+  if (error || user) {
     const newUrl = window.location.pathname
     window.history.replaceState({}, '', newUrl)
   }

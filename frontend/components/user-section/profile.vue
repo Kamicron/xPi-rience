@@ -141,7 +141,9 @@ const loadProfile = async () => {
     profiles.value = await fetchProfiles();
 
     console.log('profiles.value', profiles.value)
-    currentProfile.value = profiles.value[0];
+    if (profiles.value && profiles.value.length > 0) {
+      currentProfile.value = profiles.value[0];
+    }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Erreur lors du chargement du profil';
     console.error('Erreur loadProfile:', err);

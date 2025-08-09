@@ -8,15 +8,17 @@ export const useProfilesState = () => {
   const error = ref<string | null>(null);
 
   // Charger tous les profils
-  const fetchProfiles = async () => {
+  const fetchProfiles = async (): Promise<Profile[]> => {
     loading.value = true;
     error.value = null;
     
     try {
-      return profiles.value = await getAllProfiles();
+      profiles.value = await getAllProfiles();
+      return profiles.value;
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des profils';
       console.error('Erreur fetchProfiles:', err);
+      return [];
     } finally {
       loading.value = false;
     }

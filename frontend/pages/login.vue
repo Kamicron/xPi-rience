@@ -3,11 +3,6 @@
     <div class="login-box">
       <h2 class="login-title">Connexion</h2>
       
-      <!-- Affichage des messages d'erreur -->
-      <div v-if="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </div>
-      
       <div>
         <GoogleLoginButton />
       </div>
@@ -16,11 +11,13 @@
 </template>
 
 <script setup lang="ts">
-// Le composant GoogleLoginButton sera automatiquement importé par Nuxt
+import { EToast } from 'vue3-modern-toast'
+import { useEventBus } from '@vueuse/core'
 
-// Récupérer les paramètres d'URL pour afficher les erreurs
+// Le composant GoogleLoginButton sera automatiquement importé par Nuxt
 const route = useRoute()
-const errorMessage = ref('')
+const { showError, showSuccess } = useToast()
+const eventBus = useEventBus('auth')
 
 // Vérifier les paramètres d'erreur et de succès dans l'URL
 onMounted(async () => {
@@ -28,13 +25,17 @@ onMounted(async () => {
   const message = route.query.message
   const user = route.query.user
   
-  // Gestion des erreurs
+  // Gestion des erreurs avec toasts
   if (error === 'user_not_registered') {
-    errorMessage.value = message ? decodeURIComponent(message as string) : 'Utilisateur non enregistré'
+    const errorMsg = message ? decodeURIComponent(message as string) : 'Utilisateur non enregistré'
+    console.log('Tentative d\'affichage du toast d\'erreur:', errorMsg)
+    showError(errorMsg)
   } else if (error === 'auth_failed') {
-    errorMessage.value = 'Échec de l\'authentification'
+    console.log('Tentative d\'affichage du toast auth_failed')
+    showError('Échec de l\'authentification')
   } else if (error === 'auth_error') {
-    errorMessage.value = 'Erreur d\'authentification'
+    console.log('Tentative d\'affichage du toast auth_error')
+    showError('Erreur d\'authentification')
   }
   
   // Gestion du succès de connexion
@@ -48,15 +49,17 @@ onMounted(async () => {
       // Si un token JWT est présent, le stocker séparément pour faciliter l'accès
       if (userData.jwtToken) {
         localStorage.setItem('jwtToken', userData.jwtToken)
-        console.log('✅ Token JWT stocké avec succès!')
       }
+      
+      // Émettre un événement de connexion réussie
+      eventBus.emit('login-success', userData)
       
       // Rediriger vers la page d'accueil ou dashboard
       await navigateTo('/')
       
     } catch (error) {
       console.error('Erreur lors du parsing des données utilisateur:', error)
-      errorMessage.value = 'Erreur lors de la récupération des données utilisateur'
+      showError('Erreur lors de la récupération des données utilisateur')
     }
   }
   
@@ -69,13 +72,26 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.error-message {
-  background-color: #fee;
-  border: 1px solid #fcc;
-  color: #c33;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 4px;
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.login-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-title {
   text-align: center;
+  margin-bottom: 2rem;
+  color: #333;
 }
 </style>

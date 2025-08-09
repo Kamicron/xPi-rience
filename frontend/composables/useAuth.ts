@@ -1,9 +1,24 @@
+// Types pour l'utilisateur
+interface User {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  picture?: string
+  googleId: string
+  accessToken: string
+  isAdmin: boolean
+  createdAt: string
+  updatedAt: string
+  jwtToken?: string
+}
+
 /**
  * Composable pour la gestion de l'authentification et du token JWT
  */
 export const useAuth = () => {
   // État réactif pour l'utilisateur connecté
-  const user = ref(null)
+  const user = ref<User | null>(null)
   const isLoggedIn = computed(() => !!user.value)
   const isAdmin = computed(() => user.value?.isAdmin || false)
 
@@ -12,7 +27,10 @@ export const useAuth = () => {
    */
   const getJwtToken = (): string | null => {
     if (process.client) {
-      return localStorage.getItem('jwtToken')
+
+      const user = localStorage.getItem('user')
+      console.log('user', user)
+      return user ? JSON.parse(user).jwtToken : null
     }
     return null
   }
@@ -54,8 +72,10 @@ export const useAuth = () => {
   /**
    * Créer les headers d'autorisation pour les requêtes API
    */
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     const token = getJwtToken()
+
+    console.log('token', token)
     return token ? { Authorization: `Bearer ${token}` } : {}
   }
 

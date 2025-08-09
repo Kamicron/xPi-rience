@@ -3,6 +3,11 @@ export default defineNuxtConfig({
   // Date de compatibilité Nuxt
   compatibilityDate: '2024-11-01',
   
+  // Modules
+  modules: [
+    '@vueuse/nuxt'
+  ],
+  
   // Configuration de base
   app: {
     head: {
